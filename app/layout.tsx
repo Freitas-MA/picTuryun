@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import UserAppHeader from "@/components/layout-components/user-app-header";
 import UserAppSidebar from "@/components/layout-components/user-app-sidebar";
+import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,6 +24,7 @@ export default function RootLayout({
         <div className="flex">
           <UserAppSidebar className="hidden md:block z-10 border-solid border-black" />
           {children}
+          <Analytics />
         </div>
       </body>
     </html>
