@@ -2,9 +2,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
-import { SocialIcon } from "react-social-icons/component";
-import "react-social-icons/github";
-import "react-social-icons/linkedin";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
@@ -190,27 +187,6 @@ export default async function UserAppSidebar({
               */}
             </Button>
           </div>
-        </div>
-      </div>
-      <div className="flex flex-row justify-center items-center text-center absolute bottom-0 left-1">
-        <p className="text-sm">
-          <span className="font-thin">Designed by: </span>
-          <a
-            href="https://portfolio-sepia-eight-67.vercel.app/"
-            target="__blank"
-          >
-            MFreitas
-          </a>
-        </p>
-        <div className="grayscale">
-          <SocialIcon
-            style={{ scale: "0.5" }}
-            url="https://github.com/Freitas-MA"
-          />
-          <SocialIcon
-            style={{ scale: "0.5" }}
-            url="https://www.linkedin.com/in/freitas-marcos/"
-          />
         </div>
       </div>
     </div>
