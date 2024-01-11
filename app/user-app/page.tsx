@@ -55,7 +55,7 @@ export default async function page() {
               <TabsTrigger value="photos" className="relative">
                 Photos
               </TabsTrigger>
-              <TabsTrigger value="documents">Documents</TabsTrigger>
+              <TabsTrigger value="documents" disabled>Documents</TabsTrigger>
               <TabsTrigger value="other" disabled>
                 Other
               </TabsTrigger>
