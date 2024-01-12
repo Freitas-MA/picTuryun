@@ -20,12 +20,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function UserNav() {
-  const AvatarImg = 'https://cdn-icons-png.flaticon.com/512/3541/3541869.png'
+  const AvatarImg = "https://cdn-icons-png.flaticon.com/512/3541/3541869.png";
   const [user, setUser] = useState<User | null>(null);
   const supabase = createClientComponentClient();
   const router = useRouter();
   const getUser = async () => {
-    const { data: { user }, error} = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
 
     if (error) {
       console.log("UserNav", error);
@@ -34,17 +37,17 @@ export function UserNav() {
     }
   };
 
-    useEffect(() => {
-        getUser();
-    }, []);
+  useEffect(() => {
+    getUser();
+  }, []);
 
-    const handleSignOut = async () => {
-        await supabase.auth.signOut();
-        router.refresh()
-    }
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.refresh();
+  };
   return (
     <>
-    {user && (
+      {user && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -56,32 +59,54 @@ export function UserNav() {
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
+              <div className="flex flex-col space-y-2 text-center">
                 <p className="text-sm font-medium leading-none">
-                    {user.email?.split("@")[0]}
+                  {user.email?.split("@")[0]}
                 </p>
-                <p className="text-xs leading-none text-muted-foreground">
+                <p className="text-[8px] leading-none text-muted-foreground">
                   {user.email}
                 </p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                Profile
+              <DropdownMenuItem className="justify-start w-full items-start">
+                <Button variant={"link"} disabled={true} className="w-full">
+                  Profile
+                </Button>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                Settings
+              <DropdownMenuItem className="justify-start w-full items-start">
+                <Button variant={"link"} disabled={true} className="w-full">
+                  Settings
+                </Button>
               </DropdownMenuItem>
-          </DropdownMenuGroup>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleSignOut}>
-              Log out
+            <DropdownMenuItem className="justify-start w-full items-start">
+              <Button
+                variant={"secondary"}
+                disabled={true}
+                className="w-full bg-orange-300"
+              >
+                Premiun
+              </Button>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="justify-start w-full items-start"
+              onClick={handleSignOut}
+            >
+              <Button
+                variant={"destructive"}
+                disabled={false}
+                className="w-full"
+              >
+                Logout
+              </Button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-    )}
-        
+      )}
     </>
   );
 }

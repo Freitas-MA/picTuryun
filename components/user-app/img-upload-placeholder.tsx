@@ -116,7 +116,6 @@ export default function ImageUploadPlaceholder() {
         preview: URL.createObjectURL(imageBlob),
       });
 
-
       const imageFile = new File([imageBlob], "filename.jpeg");
       const { data, error } = await supabase.storage
         .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
@@ -126,7 +125,6 @@ export default function ImageUploadPlaceholder() {
           // * The error of .name is becouse the file does not have the property until finish the process, just ignore!
           imageFile
         );
-
 
       if (error) {
         throw error;
@@ -177,20 +175,24 @@ export default function ImageUploadPlaceholder() {
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              
               <div className="grid gap-2 cursor-pointer">
                 {!file && (
-                  <div {...getRootProps()}>
-                    <input {...getInputProps}/>
-                      {isDragActive ? (
-                        <p className="flex items-center justify-center bg-blue-100 opacity-70 border border-dashed border-blue-300 p-6 h-36 rounded-md">
-                          Drop the files here ...
-                        </p>
-                      ) : (
-                        <p className="flex items-center justify-center bg-blue-100 opacity-70 border border-dashed border-blue-300 p-6 h-36 rounded-md">
-                          Drag or Click to choose image...
-                        </p>
-                      )}
+                  <div id="dropzone" {...getRootProps()}>
+                    <input
+                      id="mobile-file-input"
+                      type="file"
+                      className="sr-only absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-50"
+                      {...getInputProps}
+                    />
+                    {isDragActive ? (
+                      <p className="flex items-center justify-center bg-blue-100 opacity-70 border border-dashed border-blue-300 p-6 h-36 rounded-md">
+                        Drop the files here ...
+                      </p>
+                    ) : (
+                      <p className="flex items-center justify-center bg-blue-100 opacity-70 border border-dashed border-blue-300 p-6 h-36 rounded-md">
+                        Drag and drop some files here!
+                      </p>
+                    )}
                   </div>
                 )}
                 <div className="flex flex-col items-center justify-evenly sm:flex-row gap-2">
@@ -200,7 +202,7 @@ export default function ImageUploadPlaceholder() {
                         <img
                           src={file.preview}
                           className="w-48 h-48 object-contain rounded-md"
-                            onLoad={() => URL.revokeObjectURL(file.preview)}
+                          onLoad={() => URL.revokeObjectURL(file.preview)}
                         />
                       </div>
                     </div>
@@ -221,7 +223,16 @@ export default function ImageUploadPlaceholder() {
                 </div>
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="flex flex-row justify-end gap-2">
+                <Button
+                  className="bg-green-400"
+                  variant={"ghost"}
+                  disabled={file ? true : false}
+                >
+              <label htmlFor="mobile-file-input">
+                  Select File
+              </label>
+                </Button>
               <Button disabled={file ? false : true} onClick={handleEnhance}>
                 Enhance
               </Button>

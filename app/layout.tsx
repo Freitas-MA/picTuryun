@@ -12,9 +12,12 @@ export const metadata: Metadata = {
   title: "picTuryun",
   description: "Using AI to make your life easy!",
   icons: {
-    icon: "/favicon.ico",
-    apple: "/favicon.ico",
+    icon: ["/favicon.ico"],
+    apple: ["/apple-touch-icon.png"],
+    shortcut: ["/apple-touch-icon.png"],
+    // android: ["/android-chrome-192x192.png"],
   },
+  manifest: '/site.webmanifest',
 };
 
 export default function RootLayout({
