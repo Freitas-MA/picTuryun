@@ -24,6 +24,16 @@ export function UserNav() {
   const [user, setUser] = useState<User | null>(null);
   const supabase = createClientComponentClient();
   const router = useRouter();
+  const [authorized, setAuthorized] = useState(false);
+
+  const handleAuth = async () => {
+    const {data: {session}, error} = await supabase.auth.getSession()
+    if (error) {
+      console.log("handleAuth", error);
+    } else {
+      setAuthorized(true);
+    }   
+  }
   const getUser = async () => {
     const {
       data: { user },
@@ -38,13 +48,19 @@ export function UserNav() {
   };
 
   useEffect(() => {
+    handleAuth();
     getUser();
   }, []);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.refresh();
+    setTimeout(() => {
+      router.refresh();
+    }, 350);
   };
+
+  if (!authorized) return null;
+
   return (
     <>
       {user && (

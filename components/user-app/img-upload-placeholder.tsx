@@ -14,6 +14,7 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import { set } from "zod";
 
 interface FilePreview {
   file: Blob;
@@ -23,13 +24,22 @@ interface FilePreview {
 export default function ImageUploadPlaceholder() {
   const [isMounted, setIsMounted] = useState(false);
 
+  const [disableEnhanceButton, setDisableEnhanceButton] = useState(true);
+
   const router = useRouter();
 
+  // * This is the file that will be previewed
   const [file, setFile] = useState<FilePreview | null>();
+
+  // * This is the file that will be processed
   const [fileToProcess, setFileToProcess] = useState<{
     path: string;
   } | null>(null);
+
+  // * This is the file that will be restored
   const [restoredFile, setRestoredFile] = useState<FilePreview | null>();
+
+  // * onDrop is the function that will be called when the user drop the file
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     try {
       //   Caputre the file
@@ -39,6 +49,8 @@ export default function ImageUploadPlaceholder() {
         file,
         preview: URL.createObjectURL(file),
       });
+
+      console.log("file", file);
 
       //   Upload the file to the server
       const supabase = createClientComponentClient();
@@ -56,6 +68,10 @@ export default function ImageUploadPlaceholder() {
     }
   }, []);
 
+  /**
+   * Renders a placeholder component for image upload.
+   * @returns The root props, input props, whether the drag is active, and the open function.
+   */
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     maxFiles: 1,
     accept: {
@@ -65,8 +81,12 @@ export default function ImageUploadPlaceholder() {
     onDrop,
   });
 
+  /**
+   * Sets the component as mounted and cleans up any object URLs when unmounting.
+   */
   useEffect(() => {
     setIsMounted(true);
+    setDisableEnhanceButton(true);
     return () => {
       if (file) URL.revokeObjectURL(file.preview);
       if (restoredFile) URL.revokeObjectURL(restoredFile.preview);
@@ -88,6 +108,7 @@ export default function ImageUploadPlaceholder() {
     try {
       // set the placeHolder
       //   Upload the file to the server
+      setDisableEnhanceButton(false);
       const supabase = createClientComponentClient();
       const {
         data: { publicUrl },
@@ -179,8 +200,17 @@ export default function ImageUploadPlaceholder() {
                 {!file && (
                   <div id="dropzone" {...getRootProps()}>
                     <input
-                      id="mobile-file-input"
                       type="file"
+                      className="hidden"
+                      id="file-input-mobile"
+                      accept="image/png, image/jpeg"
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          onDrop(Array.from(e.target.files));
+                        }
+                      }}
+                    />
+                    <input
                       className="sr-only absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-50"
                       {...getInputProps}
                     />
@@ -189,11 +219,14 @@ export default function ImageUploadPlaceholder() {
                         Drop the files here ...
                       </p>
                     ) : (
-                      <p className="flex items-center justify-center bg-blue-100 opacity-70 border border-dashed border-blue-300 p-6 h-36 rounded-md">
-                        Drag and drop some files here!
-                      </p>
+                      <span className="flex items-center justify-center bg-blue-100 opacity-70 border border-dashed border-blue-300 p-6 h-36 rounded-md">
+                        {/* <p className="hidd md:block">Click!</p> */}
+                        <p>Drag and drop some files here!</p>
+                      </span>
                     )}
                   </div>
+
+                  // <SingleImageDropzone width={450} height={200} />
                 )}
                 <div className="flex flex-col items-center justify-evenly sm:flex-row gap-2">
                   {file && (
@@ -224,16 +257,17 @@ export default function ImageUploadPlaceholder() {
               </div>
             </div>
             <DialogFooter className="flex flex-row justify-end gap-2">
-                <Button
-                  className="bg-green-400"
-                  variant={"ghost"}
-                  disabled={file ? true : false}
-                >
-              <label htmlFor="mobile-file-input">
-                  Select File
-              </label>
-                </Button>
-              <Button disabled={file ? false : true} onClick={handleEnhance}>
+              <Button
+                className="bg-green-400 md:hidden"
+                variant={"ghost"}
+                disabled={file ? true : false}
+              >
+                <label htmlFor="file-input-mobile">Select File</label>
+              </Button>
+              <Button
+                disabled={file && disableEnhanceButton ? false : true}
+                onClick={handleEnhance}
+              >
                 Enhance
               </Button>
             </DialogFooter>

@@ -75,7 +75,7 @@ export default async function page() {
             <Separator className="my-4 border border-slate-300" />
             <div className="flex flex-col items-center justify-center">
               <ImageUploadPlaceholder />
-              <div className="flex flex-wrap space-x-4 pb-4 justify-evenly">
+              <div className="flex flex-wrap max-w-7xl space-x-4 pb-4 justify-around">
                 {restoredImages
                   ? restoredImages?.map((restoredImage) => (
                       <UserAppImage

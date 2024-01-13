@@ -1,6 +1,8 @@
 "use client";
 import Image from "next/image";
 import { PlusCircleIcon } from "lucide-react";
+import { IoMdDownload } from "react-icons/io";
+
 
 import { cn } from "@/lib/utils";
 import {
@@ -62,22 +64,27 @@ export function UserAppImage({
         <ContextMenuTrigger>
           <div className="overflow-hidden rounded-md flex flex-row flex-wrap">
             {publicUrl ? (
-              <Image
-                src={publicUrl + "/" + image.name}
-                alt={image.name}
-                width={width}
-                height={height}
-                className={cn(
-                  "h-auto w-auto object-cover transition-all hover:scale-105",
-                  aspectRatio === "portrait" ? "aspect-[3/4]" : "aspect-square"
-                )}
-              />
+              <div className="relative">
+                <Image
+                  src={publicUrl + "/" + image.name}
+                  alt={image.name}
+                  width={width}
+                  height={height}
+                  className={cn(
+                    "h-auto w-auto object-cover transition-all hover:scale-105",
+                    aspectRatio === "portrait"
+                      ? "aspect-[3/4]"
+                      : "aspect-square"
+                  )}
+                />
+                <button onClick={() => downloadImage(image.name)} className="absolute top-1 right-1 text-gray-600 border border-white rounded bg-slate-50"><IoMdDownload /></button>
+              </div>
             ) : null}
           </div>
         </ContextMenuTrigger>
         <ContextMenuContent className="w-40">
-          <ContextMenuItem>Add to Collection</ContextMenuItem>
-          <ContextMenuSub>
+          {/* <ContextMenuItem>Add to Collection</ContextMenuItem> */}
+          {/* <ContextMenuSub>
             <ContextMenuSubTrigger>Add to Photos</ContextMenuSubTrigger>
             <ContextMenuSubContent className="w-48">
               <ContextMenuItem>
@@ -86,23 +93,23 @@ export function UserAppImage({
               </ContextMenuItem>
               <ContextMenuSeparator />
             </ContextMenuSubContent>
-          </ContextMenuSub>
-          <ContextMenuSeparator />
-          <ContextMenuItem>Delete</ContextMenuItem>
+          </ContextMenuSub> */}
+          {/* <ContextMenuSeparator /> */}
+          {/* <ContextMenuItem>Delete</ContextMenuItem>
           <ContextMenuItem>Duplicate</ContextMenuItem>
-          <ContextMenuItem>Create Station</ContextMenuItem>
-          <ContextMenuSeparator />
+          <ContextMenuItem>Create Station</ContextMenuItem> */}
+          {/* <ContextMenuSeparator /> */}
           <ContextMenuItem onClick={() => downloadImage(image.name)}>
             Download
           </ContextMenuItem>
-          <ContextMenuSeparator />
-          <ContextMenuItem>Like</ContextMenuItem>
-          <ContextMenuItem>Share</ContextMenuItem>
+          {/* <ContextMenuSeparator /> */}
+          {/* <ContextMenuItem>Like</ContextMenuItem>
+          <ContextMenuItem>Share</ContextMenuItem> */}
         </ContextMenuContent>
       </ContextMenu>
-      <div className="space-y-1 text-sm">
+      {/* <div className="space-y-1 text-sm">
         <p className="text-xs text-muted-foreground">{image.name}</p>
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -8,6 +8,7 @@ export default function UserAppHeader() {
             <img src={favicon.src} alt="" />
           pic<span className="font-extralight">Turyun</span>
         </span>
+        {/* TODO Fix the authorized render of UserNav */}
         <UserNav />
       </nav>
     </header>
