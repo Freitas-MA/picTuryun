@@ -30,6 +30,7 @@ export default async function page() {
     .list(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_RESTORED, {
       limit: 10,
       offset: 0,
+      // sortBy: { column: "name", order: "asc" },
       sortBy: { column: "name", order: "asc" },
     });
 
@@ -43,7 +44,9 @@ export default async function page() {
 
   const imageUrl = publicUrl;
 
-  // console.log("Public Url pageApp", publicUrl);
+  console.log("restoredImages", restoredImages);
+
+  console.log("Public Url pageApp", publicUrl);
   // console.log("image Url pageApp", imageUrl);
 
   return (
@@ -77,17 +80,18 @@ export default async function page() {
               <ImageUploadPlaceholder />
               <div className="flex flex-wrap max-w-7xl space-x-4 pb-4 justify-around">
                 {restoredImages
-                  ? restoredImages?.map((restoredImage) => (
-                      <UserAppImage
-                        key={restoredImage.name}
-                        image={restoredImage}
-                        publicUrl={imageUrl}
-                        className="w-[150px] m-3 shrink"
-                        aspectRatio="square"
-                        width={150}
-                        height={270}
-                      />
-                    ))
+                  ? restoredImages
+                  .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).map((restoredImage) => (
+                    <UserAppImage
+                      key={restoredImage.name}
+                      image={restoredImage}
+                      publicUrl={imageUrl}
+                      className="w-[150px] m-3 shrink"
+                      aspectRatio="square"
+                      width={150}
+                      height={270}
+                    />
+                  ))
                   : null}
               </div>
             </div>
