@@ -54,6 +54,7 @@ export function UserNav() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+    setAuthorized(false);
     setTimeout(() => {
       router.refresh();
     }, 350);

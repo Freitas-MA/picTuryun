@@ -47,7 +47,7 @@ export async function POST(req: NextRequestWithImage, res: NextResponse) {
 
   let restoredImage: string | null = null;
   while (!restoredImage) {
-    console.log('Pooling...')
+    // console.log('Pooling...')
     let finalResponse = await fetch(endpointUrl, {
       method: "GET",
       headers: {

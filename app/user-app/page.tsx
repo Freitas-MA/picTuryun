@@ -44,10 +44,6 @@ export default async function page() {
 
   const imageUrl = publicUrl;
 
-  console.log("restoredImages", restoredImages);
-
-  console.log("Public Url pageApp", publicUrl);
-  // console.log("image Url pageApp", imageUrl);
 
   return (
     <div className="flex flex-col w-full mt-0 z-0">
