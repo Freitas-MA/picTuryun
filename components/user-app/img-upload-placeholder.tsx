@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { IoMdDownload } from "react-icons/io";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +15,7 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import { v4 as uuidv4 } from "uuid";
 import { set } from "zod";
 
 interface FilePreview {
@@ -42,23 +44,30 @@ export default function ImageUploadPlaceholder() {
   // * onDrop is the function that will be called when the user drop the file
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     try {
+      // Create a new name
+      const uuid = uuidv4();
+      const newName = `picturyn-${uuid}.${acceptedFiles[0].type.split("/")[1]}`;
+
+      // Create a new file with the new name and the same atributes of the accpedFiles
+      const updatedAcceptedFiles = new File([acceptedFiles[0]], newName, {
+        type: acceptedFiles[0].type,
+        lastModified: acceptedFiles[0].lastModified,
+      });
+
       //   Caputre the file
-      const file = acceptedFiles[0];
-      //   set Preview
+      const file = updatedAcceptedFiles;
       setFile({
         file,
         preview: URL.createObjectURL(file),
       });
-
-      console.log("file", file);
 
       //   Upload the file to the server
       const supabase = createClientComponentClient();
       const { data, error } = await supabase.storage
         .from(`${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER}`)
         .upload(
-          `${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_PROCESSING}/${acceptedFiles[0].name}`,
-          acceptedFiles[0]
+          `${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_PROCESSING}/${updatedAcceptedFiles.name}`,
+          updatedAcceptedFiles
         );
       if (!error) {
         setFileToProcess(data);
@@ -80,6 +89,14 @@ export default function ImageUploadPlaceholder() {
     },
     onDrop,
   });
+  // handle dialog open change event is just to track the state of the dialog
+  const handlleDialogOpenChange = async (e: boolean) => {
+    if (!e) {
+      setFile(null);
+      setRestoredFile(null);
+      router.refresh();
+    }
+  };
 
   /**
    * Sets the component as mounted and cleans up any object URLs when unmounting.
@@ -91,25 +108,16 @@ export default function ImageUploadPlaceholder() {
       if (file) URL.revokeObjectURL(file.preview);
       if (restoredFile) URL.revokeObjectURL(restoredFile.preview);
     };
-  }, []);
-
-  // handle dialog open change event is just to track the state of the dialog
-  const handlleDialogOpenChange = async (e: boolean) => {
-    if (!e) {
-      setFile(null);
-      setRestoredFile(null);
-      router.refresh();
-    }
-  };
+  }, [handlleDialogOpenChange]);
 
   // handle enhance button click event
+  const supabase = createClientComponentClient();
 
   const handleEnhance = async () => {
     try {
       // set the placeHolder
       //   Upload the file to the server
       setDisableEnhanceButton(false);
-      const supabase = createClientComponentClient();
       const {
         data: { publicUrl },
       } = supabase.storage
@@ -226,7 +234,6 @@ export default function ImageUploadPlaceholder() {
                     )}
                   </div>
 
-                  // <SingleImageDropzone width={450} height={200} />
                 )}
                 <div className="flex flex-col items-center justify-evenly sm:flex-row gap-2">
                   {file && (
@@ -265,7 +272,7 @@ export default function ImageUploadPlaceholder() {
                 <label htmlFor="file-input-mobile">Select File</label>
               </Button>
               <Button
-                disabled={file && disableEnhanceButton ? false : true}
+                disabled={file ? (restoredFile ? true : false) : true}
                 onClick={handleEnhance}
               >
                 Enhance

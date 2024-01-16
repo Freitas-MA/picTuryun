@@ -1,9 +1,7 @@
+// Import necessary dependencies
 "use client";
 import Image from "next/image";
-import { PlusCircleIcon } from "lucide-react";
 import { IoMdDownload } from "react-icons/io";
-
-
 import { cn } from "@/lib/utils";
 import {
   ContextMenu,
@@ -19,6 +17,7 @@ import { RestoredImage } from "@/types";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
+// Define the props interface for the UserAppImage component
 interface AlbumArtworkProps extends React.HTMLAttributes<HTMLDivElement> {
   image: RestoredImage;
   aspectRatio?: "portrait" | "square";
@@ -28,6 +27,7 @@ interface AlbumArtworkProps extends React.HTMLAttributes<HTMLDivElement> {
   metadata?: string;
 }
 
+// Define the UserAppImage component
 export function UserAppImage({
   image,
   aspectRatio = "portrait",
@@ -38,15 +38,19 @@ export function UserAppImage({
   className,
   ...props
 }: AlbumArtworkProps) {
+  // Define the downloadImage function
   const downloadImage = async (image: string) => {
+    // Create a Supabase client
     const supabase = createClientComponentClient();
 
+    // Download the image from the Supabase storage
     const { data, error } = await supabase.storage
       .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
       .download(
         `${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_RESTORED}/${image}`
       );
 
+    // If the download is successful, create a download link and trigger the download
     if (data) {
       var a = document.createElement("a");
       document.body.appendChild(a);
@@ -58,11 +62,15 @@ export function UserAppImage({
     }
   };
 
+  // Render the UserAppImage component
   return (
     <div className={cn("space-y-3", className)} {...props}>
+      {/* Add a context menu */}
       <ContextMenu>
+        {/* Add a trigger for the context menu */}
         <ContextMenuTrigger>
           <div className="overflow-hidden rounded-md flex flex-row flex-wrap">
+            {/* Render the image if publicUrl is available */}
             {publicUrl ? (
               <div className="relative">
                 <Image
@@ -77,12 +85,15 @@ export function UserAppImage({
                       : "aspect-square"
                   )}
                 />
+                {/* Add a button to download the image */}
                 <button onClick={() => downloadImage(image.name)} className="absolute top-1 right-1 text-gray-600 border border-white rounded bg-slate-50"><IoMdDownload /></button>
               </div>
             ) : null}
           </div>
         </ContextMenuTrigger>
+        {/* Add content for the context menu */}
         <ContextMenuContent className="w-40">
+          {/* Add context menu items */}
           {/* <ContextMenuItem>Add to Collection</ContextMenuItem> */}
           {/* <ContextMenuSub>
             <ContextMenuSubTrigger>Add to Photos</ContextMenuSubTrigger>
@@ -99,6 +110,7 @@ export function UserAppImage({
           <ContextMenuItem>Duplicate</ContextMenuItem>
           <ContextMenuItem>Create Station</ContextMenuItem> */}
           {/* <ContextMenuSeparator /> */}
+          {/* Add a context menu item to download the image */}
           <ContextMenuItem onClick={() => downloadImage(image.name)}>
             Download
           </ContextMenuItem>

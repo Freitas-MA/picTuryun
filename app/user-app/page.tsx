@@ -1,16 +1,26 @@
+// Import necessary components and libraries
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { RedirectType, redirect } from "next/navigation";
-
 import { Separator } from "@/components/ui/separator";
 import ImageUploadPlaceholder from "@/components/user-app/img-upload-placeholder";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { UserAppImage } from "@/components/user-app/user-app-image";
+
+/**
+ * Renders the page component.
+ * This component is responsible for displaying the user's photo collection and other content.
+ * It checks if the user is logged in and redirects to the home page if not.
+ * It also fetches the restored images from the storage and displays them in a grid.
+ */
 export default async function page() {
   let loggedIn = false;
+
+  // Create a Supabase client using server-side authentication
   const supabase = createServerComponentClient({ cookies });
+  
   try {
+    // Check if there is an active session for the user
     const {
       data: { session },
     } = await supabase.auth.getSession();
@@ -19,21 +29,24 @@ export default async function page() {
       loggedIn = true;
     }
   } catch (error) {
+    // Handle error if authentication session cannot be retrieved
   } finally {
+    // If the user is not logged in, redirect to the home page
     if (!loggedIn) {
       redirect("/", RedirectType.replace);
     }
   }
 
+  // Fetch the restored images from the storage
   const { data: restoredImages, error } = await supabase.storage
     .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
     .list(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_RESTORED, {
-      limit: 10,
+      limit: 12,
       offset: 0,
-      // sortBy: { column: "name", order: "asc" },
       sortBy: { column: "name", order: "asc" },
     });
 
+  // Get the public URL of the restored images
   const {
     data: { publicUrl },
   } = await supabase.storage
@@ -44,7 +57,7 @@ export default async function page() {
 
   const imageUrl = publicUrl;
 
-
+  // Render the page component
   return (
     <div className="flex flex-col w-full mt-0 z-0">
       <div className="h-full w-full px-4 py-6 lg:px-8">
@@ -77,47 +90,22 @@ export default async function page() {
               <div className="flex flex-wrap max-w-7xl space-x-4 pb-4 justify-around">
                 {restoredImages
                   ? restoredImages
-                  .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).map((restoredImage) => (
-                    <UserAppImage
-                      key={restoredImage.name}
-                      image={restoredImage}
-                      publicUrl={imageUrl}
-                      className="w-[150px] m-3 shrink"
-                      aspectRatio="square"
-                      width={150}
-                      height={270}
-                    />
-                  ))
+                      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                      .map((restoredImage) => (
+                        <UserAppImage
+                          key={restoredImage.name}
+                          image={restoredImage}
+                          publicUrl={imageUrl}
+                          className="w-[150px] m-3 shrink"
+                          aspectRatio="square"
+                          width={150}
+                          height={270}
+                        />
+                      ))
                   : null}
               </div>
             </div>
-            {/* <div className="mt-6 space-y-1">
-              <h2 className="text-2xl font-semibold tracking-tight">
-                Made for You
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                Your personal playlists. Updated daily.
-              </p>
-            </div>
-            <Separator className="my-4 border border-slate-300" />
-            <div className="relative">Lista 2</div> */}
           </TabsContent>
-          {/* <TabsContent
-            value="documents"
-            className="h-full flex-col border-none p-0 data-[state=active]:flex"
-          >
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <h2 className="text-2xl font-semibold tracking-tight">
-                  New Episodes
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  Your favorite podcasts. Updated daily.
-                </p>
-              </div>
-            </div>
-            <Separator className="my-4 shadow-sm" />
-          </TabsContent> */}
         </Tabs>
       </div>
     </div>
