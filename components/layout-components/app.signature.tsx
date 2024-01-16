@@ -4,7 +4,7 @@ import "react-social-icons/linkedin";
 
 export default function AppSignature() {
   return (
-    <div className="flex flex-row pl-4 items-center text-center">
+    <div className="flex flex-row fixed bottom-0 left-5 pl-4 items-center text-center">
       <p className="text-sm">
         <span className="font-thin">Designed by: </span>
         <a href="https://portfolio-sepia-eight-67.vercel.app/" target="__blank">

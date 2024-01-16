@@ -5,7 +5,6 @@ import {
 } from "@supabase/auth-helpers-nextjs";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { UserIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
