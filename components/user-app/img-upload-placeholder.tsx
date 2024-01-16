@@ -62,6 +62,8 @@ export default function ImageUploadPlaceholder() {
         );
       if (!error) {
         setFileToProcess(data);
+        console.log("acceptedFiles", acceptedFiles[0]);
+        console.log("acceptedFiles.Name", acceptedFiles[0].name);
       }
     } catch (error) {
       console.log("onDrop", error);
