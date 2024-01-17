@@ -1,4 +1,4 @@
-'use client';
+"use client";
 // Import necessary dependencies and components
 import { Button } from "@/components/ui/button";
 import { IoMdDownload } from "react-icons/io";
@@ -17,6 +17,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { v4 as uuidv4 } from "uuid";
 import { set } from "zod";
+import LoadingSpinner from "../layout-components/loading-spinner";
 
 // Define the interface for the file preview
 interface FilePreview {
@@ -28,7 +29,7 @@ interface FilePreview {
 export default function ImageUploadPlaceholder() {
   // Define state variables
   const [isMounted, setIsMounted] = useState(false);
-  const [disableEnhanceButton, setDisableEnhanceButton] = useState(true);
+  const [isLoading, setIsloading] = useState(false);
   const router = useRouter();
   const [file, setFile] = useState<FilePreview | null>();
   const [fileToProcess, setFileToProcess] = useState<{ path: string } | null>(
@@ -106,7 +107,6 @@ export default function ImageUploadPlaceholder() {
 
     const handleEffect = async () => {
       setIsMounted(true);
-      setDisableEnhanceButton(true);
       return cleanup;
     };
     handleEffect();
@@ -116,7 +116,7 @@ export default function ImageUploadPlaceholder() {
   const handleEnhance = useCallback(async () => {
     const enhanceImage = async () => {
       try {
-        setDisableEnhanceButton(false);
+        setIsloading(true);
         const supabase = createClientComponentClient();
         const {
           data: { publicUrl },
@@ -155,6 +155,8 @@ export default function ImageUploadPlaceholder() {
         console.log("handleEnhance", error);
         setFile(null);
         setRestoredFile(null);
+      } finally {
+        setIsloading(false);
       }
     };
     enhanceImage();
@@ -241,7 +243,7 @@ export default function ImageUploadPlaceholder() {
                       </div>
                     </div>
                   )}
-                  {restoredFile && (
+                  {restoredFile ? (
                     <div className="flex flex-row flex-wrap drop-shadow-md">
                       <div className="flex w-60 h-60 relative">
                         <img
@@ -253,7 +255,7 @@ export default function ImageUploadPlaceholder() {
                         />
                       </div>
                     </div>
-                  )}
+                  ) : (<LoadingSpinner isLoading={isLoading} />)}
                 </div>
               </div>
             </div>
