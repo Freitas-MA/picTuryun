@@ -18,7 +18,7 @@ export default async function page() {
 
   // Create a Supabase client using server-side authentication
   const supabase = createServerComponentClient({ cookies });
-  
+
   try {
     // Check if there is an active session for the user
     const {
@@ -30,22 +30,61 @@ export default async function page() {
     }
   } catch (error) {
     // Handle error if authentication session cannot be retrieved
+    throw new Error("Error retrieving authentication session");
   } finally {
     // If the user is not logged in, redirect to the home page
     if (!loggedIn) {
       redirect("/", RedirectType.replace);
     }
   }
+  // Cleaning the prossing folder
+  const { data: processingImages } = await supabase.storage
+    .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
+    .list(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_PROCESSING, {
+      limit: 100,
+      offset: 0,
+      sortBy: { column: "name", order: "asc" },
+    });
+  if(processingImages){
+    const sortedProcessingImages = processingImages.sort((a, b) =>
+    new Date(b.created_at).getTime() -
+    new Date(a.created_at).getTime()
+    );
+    sortedProcessingImages.slice(10, 100).forEach(async (image) => {
+      await supabase.storage
+      .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
+      .remove(
+        // @ts-ignore
+       `${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_PROCESSING}/${image.name}`
+      );
+    });
+
+    console.log("Processing images deleted");
+  }
+    
+  // const { data, error } = await supabase.storage
+  // .from(`${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER}`)
+  // .upload(
+  //   `${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_PROCESSING}/${updatedAcceptedFiles.name}`,
+  //   updatedAcceptedFiles
+  // );
 
   // Fetch the restored images from the storage
   const { data: restoredImages, error } = await supabase.storage
     .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
     .list(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_RESTORED, {
-      limit: 12,
+      limit: 100,
       offset: 0,
       sortBy: { column: "name", order: "asc" },
     });
-
+  // Deleting images over than 60 from the folder restored
+    if(restoredImages && restoredImages.length > 60){
+      restoredImages.slice(60,100).forEach(async (image) => {
+        await supabase.storage
+        .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_RESTORED)
+        .remove([image.name]);
+      });
+    }
   // Get the public URL of the restored images
   const {
     data: { publicUrl },
@@ -67,7 +106,9 @@ export default async function page() {
               <TabsTrigger value="photos" className="relative">
                 Photos
               </TabsTrigger>
-              <TabsTrigger value="documents" disabled>Documents</TabsTrigger>
+              <TabsTrigger value="documents" disabled>
+                Documents
+              </TabsTrigger>
               <TabsTrigger value="other" disabled>
                 Other
               </TabsTrigger>
@@ -90,7 +131,12 @@ export default async function page() {
               <div className="flex flex-wrap max-w-7xl space-x-4 pb-4 justify-around">
                 {restoredImages
                   ? restoredImages
-                      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                      .sort(
+                        (a, b) =>
+                          new Date(b.created_at).getTime() -
+                          new Date(a.created_at).getTime()
+                      )
+                      .slice(0, 12)
                       .map((restoredImage) => (
                         <UserAppImage
                           key={restoredImage.name}
