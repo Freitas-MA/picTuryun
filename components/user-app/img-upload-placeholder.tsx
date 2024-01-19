@@ -36,6 +36,7 @@ export default function ImageUploadPlaceholder() {
     null
   );
   const [restoredFile, setRestoredFile] = useState<FilePreview | null>();
+  const supabase = createClientComponentClient();
 
   // Define the onDrop callback function
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -44,7 +45,7 @@ export default function ImageUploadPlaceholder() {
         // Generate a unique ID for the file
         const uuid = uuidv4();
         // Create a new name for the file
-        const newName = `picturyn-${uuid}.${
+        const newName = `picturyun-${uuid}.${
           acceptedFiles[0].type.split("/")[1]
         }`;
         // Create a new File object with the updated name
@@ -59,17 +60,16 @@ export default function ImageUploadPlaceholder() {
           preview: URL.createObjectURL(file),
         });
         // Upload the file to the storage
-        const supabase = createClientComponentClient();
         const { data, error } = await supabase.storage
           .from(`${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER}`)
           .upload(
             `${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_PROCESSING}/${updatedAcceptedFiles.name}`,
-            updatedAcceptedFiles
-          );
+            updatedAcceptedFiles          );
         if (!error) {
           setFileToProcess(data);
           console.log("acceptedFiles", acceptedFiles[0]);
           console.log("acceptedFiles.Name", acceptedFiles[0].name);
+          console.log("updatedAcceptedFiles", updatedAcceptedFiles);
         }
       } catch (error) {
         console.log("onDrop", error);
@@ -83,7 +83,9 @@ export default function ImageUploadPlaceholder() {
     maxFiles: 1,
     accept: {
       "image/png": [".png"],
-      "image/jpeg": [".jpeg", ".jpg"],
+      "image/jpeg": [".jpeg"],
+      "image/jpg": [".jpg"],
+      "image/gif": [".gif"],
     },
     onDrop,
   });
@@ -97,27 +99,28 @@ export default function ImageUploadPlaceholder() {
     }
   }, []);
 
-  // Set up the effect hook
-  useEffect(() => {
+  // Define the handleEffect function
+  const handleEffect = useCallback(async () => {
     // Clean up the URL objects when the component is unmounted
     const cleanup = () => {
       if (file) URL.revokeObjectURL(file.preview);
       if (restoredFile) URL.revokeObjectURL(restoredFile.preview);
     };
 
-    const handleEffect = async () => {
-      setIsMounted(true);
-      return cleanup;
-    };
-    handleEffect();
+    setIsMounted(true);
+    return cleanup;
   }, [file, restoredFile]);
+
+  // Set up the effect hook
+  useEffect(() => {
+    handleEffect();
+  }, [handleEffect]);
 
   // Define the handleEnhance callback function
   const handleEnhance = useCallback(async () => {
     const enhanceImage = async () => {
       try {
         setIsloading(true);
-        const supabase = createClientComponentClient();
         const {
           data: { publicUrl },
         } = supabase.storage
@@ -139,7 +142,10 @@ export default function ImageUploadPlaceholder() {
           file: imageBlob,
           preview: URL.createObjectURL(imageBlob),
         });
-        const imageFile = new File([imageBlob], "filename.jpeg");
+        console.log("imageBlob", imageBlob);
+        // @ts-expect-error
+        const imageFile = new File([imageBlob], file?.file.name);
+        console.log("imageFile", imageFile);
         const { data, error } = await supabase.storage
           .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
           .upload(
@@ -147,6 +153,7 @@ export default function ImageUploadPlaceholder() {
             `${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_RESTORED}/${file?.file.name}`,
             imageFile
           );
+        console.log("data handleEnhance", data);
         if (error) {
           throw error;
           setRestoredFile(null);
@@ -157,10 +164,11 @@ export default function ImageUploadPlaceholder() {
         setRestoredFile(null);
       } finally {
         setIsloading(false);
+        setFileToProcess(null);
       }
     };
     enhanceImage();
-  }, [file, fileToProcess]);
+  }, [file]);
 
   // If the component is not mounted, return null
   if (!isMounted) return null;
@@ -206,17 +214,7 @@ export default function ImageUploadPlaceholder() {
                 {!file && (
                   <div id="dropzone" {...getRootProps()}>
                     <input
-                      type="file"
-                      className="hidden"
                       id="file-input-mobile"
-                      accept="image/png, image/jpeg"
-                      onChange={(e) => {
-                        if (e.target.files) {
-                          onDrop(Array.from(e.target.files));
-                        }
-                      }}
-                    />
-                    <input
                       className="sr-only absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-50"
                       {...getInputProps}
                     />
@@ -255,7 +253,9 @@ export default function ImageUploadPlaceholder() {
                         />
                       </div>
                     </div>
-                  ) : (<LoadingSpinner isLoading={isLoading} />)}
+                  ) : (
+                    <LoadingSpinner isLoading={isLoading} />
+                  )}
                 </div>
               </div>
             </div>

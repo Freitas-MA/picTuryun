@@ -41,25 +41,29 @@ export default async function page() {
   const { data: processingImages } = await supabase.storage
     .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
     .list(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_PROCESSING, {
-      limit: 100,
+      limit: 30,
       offset: 0,
       sortBy: { column: "name", order: "asc" },
     });
   if(processingImages){
-    const sortedProcessingImages = processingImages.sort((a, b) =>
-    new Date(b.created_at).getTime() -
-    new Date(a.created_at).getTime()
-    );
-    sortedProcessingImages.slice(10, 100).forEach(async (image) => {
-      await supabase.storage
-      .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
-      .remove(
-        // @ts-ignore
-       `${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_PROCESSING}/${image.name}`
+    if(processingImages.length > 10){
+      const sortedProcessingImages = processingImages.sort((a, b) =>
+      new Date(b.created_at).getTime() -
+      new Date(a.created_at).getTime()
       );
-    });
+      sortedProcessingImages.slice(10, 100).forEach(async (image) => {
+        await supabase.storage
+        .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
+        .remove(
+          // @ts-ignore
+         `${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_PROCESSING}/${image.name}`
+        );
+      });
+      console.log("Processing images deleted");
+    } else {
+      console.log('Nothing to delete!')
+    }
 
-    console.log("Processing images deleted");
   }
     
   // const { data, error } = await supabase.storage
