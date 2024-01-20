@@ -18,7 +18,6 @@ import { useDropzone } from "react-dropzone";
 import { v4 as uuidv4 } from "uuid";
 import { set } from "zod";
 import LoadingSpinner from "../layout-components/loading-spinner";
-import { type } from './../../types/index';
 
 // Define the interface for the file preview
 interface FilePreview {
