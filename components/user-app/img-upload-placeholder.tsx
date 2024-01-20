@@ -267,15 +267,15 @@ export default function ImageUploadPlaceholder() {
               </div>
             </div>
             <DialogFooter className="flex flex-row justify-end gap-2">
-              <label htmlFor="file-input-mobile">
                 <Button
                   className="bg-green-400 md:hidden"
                   variant={"ghost"}
                   disabled={file ? true : false}
                 >
+              <label htmlFor="file-input-mobile">
                   Select File
-                </Button>
               </label>
+                </Button>
               <input
                 type="file"
                 className="hidden"
