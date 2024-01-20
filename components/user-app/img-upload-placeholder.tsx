@@ -221,6 +221,7 @@ export default function ImageUploadPlaceholder() {
                     <input
                       id="file-input-mobile"
                       className="sr-only absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-50"
+                      accept="image/png, image/jpeg, image/jpg"
                       {...getInputProps}
                     />
                     {isDragActive ? (
