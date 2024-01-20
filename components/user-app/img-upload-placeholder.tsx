@@ -18,6 +18,7 @@ import { useDropzone } from "react-dropzone";
 import { v4 as uuidv4 } from "uuid";
 import { set } from "zod";
 import LoadingSpinner from "../layout-components/loading-spinner";
+import { type } from './../../types/index';
 
 // Define the interface for the file preview
 interface FilePreview {
@@ -222,6 +223,7 @@ export default function ImageUploadPlaceholder() {
                       id="file-input-mobile"
                       className="sr-only absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-50"
                       accept="image/png, image/jpeg, image/jpg"
+                      type="file"
                       {...getInputProps}
                     />
                     {isDragActive ? (
