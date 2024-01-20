@@ -5,6 +5,7 @@ import UserAppHeader from "@/components/layout-components/user-app-header";
 import UserAppSidebar from "@/components/layout-components/user-app-sidebar";
 import { Analytics } from "@vercel/analytics/react";
 import AppSignature from "@/components/layout-components/app.signature";
+import CookiesNotice from "@/components/auth/cookies";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
     shortcut: ["/apple-touch-icon.png"],
     // android: ["/android-chrome-192x192.png"],
   },
-  manifest: '/site.webmanifest',
+  manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({
@@ -34,6 +35,7 @@ export default function RootLayout({
           {children}
           <Analytics />
         </div>
+        <CookiesNotice className="flex flex-col fixed bottom-8 left-[50%] translate-x-[-50%] w-[350px] p-4 rounded-md bg-yellow-500 text-white text-center" />
         <AppSignature />
       </body>
     </html>

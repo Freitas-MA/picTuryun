@@ -42,6 +42,7 @@ export default function ImageUploadPlaceholder() {
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const handleDrop = async () => {
       try {
+        setFileToProcess(null)
         // Generate a unique ID for the file
         const uuid = uuidv4();
         // Create a new name for the file
@@ -64,7 +65,9 @@ export default function ImageUploadPlaceholder() {
           .from(`${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER}`)
           .upload(
             `${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_PROCESSING}/${updatedAcceptedFiles.name}`,
-            updatedAcceptedFiles          );
+            updatedAcceptedFiles, {
+              contentType: updatedAcceptedFiles.type,
+            }          );
         if (!error) {
           setFileToProcess(data);
           console.log("acceptedFiles", acceptedFiles[0]);
@@ -85,9 +88,9 @@ export default function ImageUploadPlaceholder() {
       "image/png": [".png"],
       "image/jpeg": [".jpeg"],
       "image/jpg": [".jpg"],
-      "image/gif": [".gif"],
     },
     onDrop,
+    // maxSize: 3000000,
   });
 
   // Define the handlleDialogOpenChange callback function
@@ -123,9 +126,10 @@ export default function ImageUploadPlaceholder() {
         setIsloading(true);
         const {
           data: { publicUrl },
-        } = supabase.storage
+        } = await supabase.storage
           .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
           .getPublicUrl(`${fileToProcess?.path}`);
+          console.log("publicUrl", publicUrl)
         const res = await fetch("api/ai/replicate", {
           method: "POST",
           headers: {
@@ -151,7 +155,9 @@ export default function ImageUploadPlaceholder() {
           .upload(
             // @ts-ignore
             `${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_RESTORED}/${file?.file.name}`,
-            imageFile
+            imageFile, {
+              contentType: imageFile.type,
+            }
           );
         console.log("data handleEnhance", data);
         if (error) {
@@ -164,11 +170,10 @@ export default function ImageUploadPlaceholder() {
         setRestoredFile(null);
       } finally {
         setIsloading(false);
-        setFileToProcess(null);
       }
     };
     enhanceImage();
-  }, [file]);
+  }, [file, fileToProcess]);
 
   // If the component is not mounted, return null
   if (!isMounted) return null;
@@ -268,7 +273,7 @@ export default function ImageUploadPlaceholder() {
                 <label htmlFor="file-input-mobile">Select File</label>
               </Button>
               <Button
-                disabled={file ? (restoredFile ? true : false) : true}
+                disabled={fileToProcess ? (restoredFile ? true : false) : true}
                 onClick={handleEnhance}
               >
                 Enhance
