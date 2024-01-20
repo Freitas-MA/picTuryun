@@ -42,7 +42,7 @@ export default function ImageUploadPlaceholder() {
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const handleDrop = async () => {
       try {
-        setFileToProcess(null)
+        setFileToProcess(null);
         // Generate a unique ID for the file
         const uuid = uuidv4();
         // Create a new name for the file
@@ -65,9 +65,11 @@ export default function ImageUploadPlaceholder() {
           .from(`${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER}`)
           .upload(
             `${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_PROCESSING}/${updatedAcceptedFiles.name}`,
-            updatedAcceptedFiles, {
+            updatedAcceptedFiles,
+            {
               contentType: updatedAcceptedFiles.type,
-            }          );
+            }
+          );
         if (!error) {
           setFileToProcess(data);
           console.log("acceptedFiles", acceptedFiles[0]);
@@ -129,7 +131,7 @@ export default function ImageUploadPlaceholder() {
         } = await supabase.storage
           .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
           .getPublicUrl(`${fileToProcess?.path}`);
-          console.log("publicUrl", publicUrl)
+        console.log("publicUrl", publicUrl);
         const res = await fetch("api/ai/replicate", {
           method: "POST",
           headers: {
@@ -155,7 +157,8 @@ export default function ImageUploadPlaceholder() {
           .upload(
             // @ts-ignore
             `${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_RESTORED}/${file?.file.name}`,
-            imageFile, {
+            imageFile,
+            {
               contentType: imageFile.type,
             }
           );
@@ -219,10 +222,7 @@ export default function ImageUploadPlaceholder() {
                 {!file && (
                   <div id="dropzone" {...getRootProps()}>
                     <input
-                      id="file-input-mobile"
                       className="sr-only absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-50"
-                      accept="image/png, image/jpeg, image/jpg"
-                      type="file"
                       {...getInputProps}
                     />
                     {isDragActive ? (
@@ -267,13 +267,26 @@ export default function ImageUploadPlaceholder() {
               </div>
             </div>
             <DialogFooter className="flex flex-row justify-end gap-2">
-              <Button
-                className="bg-green-400 md:hidden"
-                variant={"ghost"}
-                disabled={file ? true : false}
-              >
-                <label htmlFor="file-input-mobile">Select File</label>
-              </Button>
+              <label htmlFor="file-input-mobile">
+                <Button
+                  className="bg-green-400 md:hidden"
+                  variant={"ghost"}
+                  disabled={file ? true : false}
+                >
+                  Select File
+                </Button>
+              </label>
+              <input
+                type="file"
+                className="hidden"
+                id="file-input-mobile"
+                accept="image/png, image/jpeg"
+                onChange={(e) => {
+                  if (e.target.files) {
+                    onDrop(Array.from(e.target.files));
+                  }
+                }}
+              />
               <Button
                 disabled={fileToProcess ? (restoredFile ? true : false) : true}
                 onClick={handleEnhance}
