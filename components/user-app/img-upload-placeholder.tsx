@@ -280,7 +280,7 @@ export default function ImageUploadPlaceholder() {
                 type="file"
                 className="hidden"
                 id="file-input-mobile"
-                accept="image/png, image/jpeg"
+                accept="image/png, image/jpeg, image/jpg"
                 onChange={(e) => {
                   if (e.target.files) {
                     onDrop(Array.from(e.target.files));
