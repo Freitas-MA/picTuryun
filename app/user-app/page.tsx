@@ -38,33 +38,33 @@ export default async function page() {
     }
   }
   // Cleaning the prossing folder
-  const { data: processingImages } = await supabase.storage
-    .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
-    .list(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_PROCESSING, {
-      limit: 100,
-      offset: 0,
-      sortBy: { column: "name", order: "asc" },
-    });
-  if(processingImages){
-    if(processingImages.length > 10){
-      const sortedProcessingImages = processingImages.sort((a, b) =>
-      new Date(b.created_at).getTime() -
-      new Date(a.created_at).getTime()
-      );
-      sortedProcessingImages.slice(10, 100).forEach(async (image) => {
-        await supabase.storage
-        .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
-        .remove(
-          // @ts-ignore
-         `${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_PROCESSING}/${image.name}`
-        );
-      });
-      console.log("Processing images deleted");
-    } else {
-      console.log('Nothing to delete!')
-    }
+  // const { data: processingImages } = await supabase.storage
+  //   .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
+  //   .list(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_PROCESSING, {
+  //     limit: 100,
+  //     offset: 0,
+  //     sortBy: { column: "name", order: "asc" },
+  //   });
+  // if(processingImages){
+  //   if(processingImages.length > 10){
+  //     const sortedProcessingImages = processingImages.sort((a, b) =>
+  //     new Date(b.created_at).getTime() -
+  //     new Date(a.created_at).getTime()
+  //     );
+  //     sortedProcessingImages.slice(10, 100).forEach(async (image) => {
+  //       await supabase.storage
+  //       .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
+  //       .remove(
+  //         // @ts-expect-error
+  //        `${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_PROCESSING}/${image.name}`
+  //       );
+  //     });
+  //     console.log("Processing images deleted");
+  //   } else {
+  //     console.log('Nothing to delete!')
+  //   }
 
-  }
+  // }
     
 
   // Fetch the restored images from the storage
@@ -76,37 +76,37 @@ export default async function page() {
       sortBy: { column: "name", order: "asc" },
     });
     // Deleting images under the size off 4000bytes from the folder restored
-    if(restoredImages) {
-      restoredImages.forEach(async (image) => {
-        if(image.metadata.size < 4000){
-          await supabase.storage
-          .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
-          .remove(
-            // @ts-ignore
-           `${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_RESTORED}/${image.name}`
-          );
-        }
-      });
-      console.log("Small images deleted");
-    }
-  // Deleting images over than 60 from the folder restored
-    if(restoredImages){
-      if(restoredImages.length > 60) {
-        const sortedRestoredImages = restoredImages.sort((a, b) =>
-        new Date(b.created_at).getTime() -
-        new Date(a.created_at).getTime()
-        );
-        sortedRestoredImages.slice(60, 100).forEach(async (image) => {
-          await supabase.storage
-          .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
-          .remove(
-            // @ts-ignore
-           `${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_RESTORED}/${image.name}`
-          );
-        });
-        console.log("Restored images deleted");
-      }
-    }
+  //   if(restoredImages) {
+  //     restoredImages.forEach(async (image) => {
+  //       if(image.metadata.size < 4000){
+  //         await supabase.storage
+  //         .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
+  //         .remove(
+  //           // @ts-ignore
+  //          `${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_RESTORED}/${image.name}`
+  //         );
+  //       }
+  //     });
+  //     console.log("Small images deleted");
+  //   }
+  // // Deleting images over than 60 from the folder restored
+  //   if(restoredImages){
+  //     if(restoredImages.length > 60) {
+  //       const sortedRestoredImages = restoredImages.sort((a, b) =>
+  //       new Date(b.created_at).getTime() -
+  //       new Date(a.created_at).getTime()
+  //       );
+  //       sortedRestoredImages.slice(60, 100).forEach(async (image) => {
+  //         await supabase.storage
+  //         .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
+  //         .remove(
+  //           // @ts-ignore
+  //          `${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_RESTORED}/${image.name}`
+  //         );
+  //       });
+  //       console.log("Restored images deleted");
+  //     }
+  //   }
   // Get the public URL of the restored images
   const {
     data: { publicUrl },

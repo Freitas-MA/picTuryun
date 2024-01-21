@@ -16,7 +16,6 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { v4 as uuidv4 } from "uuid";
-import { set } from "zod";
 import LoadingSpinner from "../layout-components/loading-spinner";
 
 // Define the interface for the file preview
@@ -39,57 +38,47 @@ export default function ImageUploadPlaceholder() {
   const supabase = createClientComponentClient();
 
   // Define the onDrop callback function
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const handleDrop = async () => {
-      try {
-        setFileToProcess(null);
-        // Generate a unique ID for the file
-        const uuid = uuidv4();
-        // Create a new name for the file
-        const newName = `picturyun-${uuid}.${
-          acceptedFiles[0].type.split("/")[1]
-        }`;
-        // Create a new File object with the updated name
-        const updatedAcceptedFiles = new File([acceptedFiles[0]], newName, {
-          type: acceptedFiles[0].type,
-          lastModified: acceptedFiles[0].lastModified,
-        });
-        const file = updatedAcceptedFiles;
-        // Set the file and its preview in the state
-        setFile({
-          file,
-          preview: URL.createObjectURL(file),
-        });
-        // Upload the file to the storage
-        const { data, error } = await supabase.storage
-          .from(`${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER}`)
-          .upload(
-            `${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_PROCESSING}/${updatedAcceptedFiles.name}`,
-            updatedAcceptedFiles,
-            {
-              contentType: updatedAcceptedFiles.type,
-            }
-          );
-        if (!error) {
-          setFileToProcess(data);
-          console.log("acceptedFiles", acceptedFiles[0]);
-          console.log("acceptedFiles.Name", acceptedFiles[0].name);
-          console.log("updatedAcceptedFiles", updatedAcceptedFiles);
-        }
-      } catch (error) {
-        console.log("onDrop", error);
-      }
-    };
-    handleDrop();
-  }, []);
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    try {
+      setFileToProcess(null)
+      // Create a new name
+      const uuid = uuidv4();
+      const newName = `picturyn-${uuid}.${acceptedFiles[0].type.split("/")[1]}`;
 
+      // Create a new file with the new name and the same atributes of the accpedFiles
+      const updatedAcceptedFiles = new File([acceptedFiles[0]], newName, {
+        type: acceptedFiles[0].type,
+        lastModified: acceptedFiles[0].lastModified,
+      });
+
+      //   Caputre the file
+      const file = updatedAcceptedFiles;
+      setFile({
+        file,
+        preview: URL.createObjectURL(file),
+      });
+
+      //   Upload the file to the server
+      const supabase = createClientComponentClient();
+      const { data, error } = await supabase.storage
+        .from(`${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER}`)
+        .upload(
+          `${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_PROCESSING}/${updatedAcceptedFiles.name}`,
+          updatedAcceptedFiles
+        );
+      if (!error) {
+        setFileToProcess(data);
+      }
+    } catch (error) {
+      console.log("onDrop", error);
+    }
+  }, []);
   // Set up the dropzone configuration
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     maxFiles: 1,
     accept: {
       "image/png": [".png"],
-      "image/jpeg": [".jpeg"],
-      "image/jpg": [".jpg"],
+      "image/jpeg": [".jpeg", ".jpg"],
     },
     onDrop,
   });
@@ -113,7 +102,7 @@ export default function ImageUploadPlaceholder() {
 
     setIsMounted(true);
     return cleanup;
-  }, [file, restoredFile]);
+  }, []);
 
   // Set up the effect hook
   useEffect(() => {
@@ -121,61 +110,60 @@ export default function ImageUploadPlaceholder() {
   }, [handleEffect]);
 
   // Define the handleEnhance callback function
-  const handleEnhance = useCallback(async () => {
-    const enhanceImage = async () => {
-      try {
-        setIsloading(true);
-        const {
-          data: { publicUrl },
-        } = await supabase.storage
-          .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
-          .getPublicUrl(`${fileToProcess?.path}`);
-        console.log("publicUrl", publicUrl);
-        const res = await fetch("api/ai/replicate", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            imageUrl: publicUrl,
-          }),
-        });
-        const restoredImageUrl = await res.json();
-        const readImageRes = await fetch(restoredImageUrl.data);
-        const imageBlob = await readImageRes.blob();
-        setRestoredFile({
-          file: imageBlob,
-          preview: URL.createObjectURL(imageBlob),
-        });
-        console.log("imageBlob", imageBlob);
-        // @ts-expect-error
-        const imageFile = new File([imageBlob], file?.file.name);
-        console.log("imageFile", imageFile);
-        const { data, error } = await supabase.storage
-          .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
-          .upload(
-            // @ts-ignore
-            `${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_RESTORED}/${file?.file.name}`,
-            imageFile,
-            {
-              contentType: imageFile.type,
-            }
-          );
-        console.log("data handleEnhance", data);
-        if (error) {
-          throw error;
-          setRestoredFile(null);
-        }
-      } catch (error) {
-        console.log("handleEnhance", error);
-        setFile(null);
+  const handleEnhance = async () => {
+    try {
+      // set the placeHolder
+      //   Upload the file to the server
+      setIsloading(true)
+      const {
+        data: { publicUrl },
+      } = supabase.storage
+        .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
+        .getPublicUrl(`${fileToProcess?.path}`);
+
+      const res = await fetch("api/ai/replicate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          imageUrl: publicUrl,
+        }),
+      });
+
+      const restoredImageUrl = await res.json();
+
+      const readImageRes = await fetch(restoredImageUrl.data);
+
+      const imageBlob = await readImageRes.blob();
+
+      setRestoredFile({
+        file: imageBlob,
+        preview: URL.createObjectURL(imageBlob),
+      });
+
+      const imageFile = new File([imageBlob], "filename.jpeg");
+      const { data, error } = await supabase.storage
+        .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
+        .upload(
+          // @ts-ignore
+          `${process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER_RESTORED}/${file?.file.name}`,
+          // * The error of .name is becouse the file does not have the property until finish the process, just ignore!
+          imageFile
+        );
+
+      if (error) {
+        throw error;
         setRestoredFile(null);
-      } finally {
-        setIsloading(false);
       }
-    };
-    enhanceImage();
-  }, [file, fileToProcess]);
+    } catch (error) {
+      console.log("handleEnhance", error);
+      // setFile(null);
+      setRestoredFile(null);
+    } finally {
+      setIsloading(false)
+    }
+  };
 
   // If the component is not mounted, return null
   if (!isMounted) return null;
