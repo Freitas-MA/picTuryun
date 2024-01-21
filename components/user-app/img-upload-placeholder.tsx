@@ -92,7 +92,6 @@ export default function ImageUploadPlaceholder() {
       "image/jpg": [".jpg"],
     },
     onDrop,
-    // maxSize: 3000000,
   });
 
   // Define the handlleDialogOpenChange callback function
@@ -222,6 +221,17 @@ export default function ImageUploadPlaceholder() {
                 {!file && (
                   <div id="dropzone" {...getRootProps()}>
                     <input
+                      type="file"
+                      className="hidden"
+                      id="file-input-mobile"
+                      accept="image/png, image/jpeg"
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          onDrop(Array.from(e.target.files));
+                        }
+                      }}
+                    />
+                    <input
                       className="sr-only absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-50"
                       {...getInputProps}
                     />
@@ -267,15 +277,13 @@ export default function ImageUploadPlaceholder() {
               </div>
             </div>
             <DialogFooter className="flex flex-row justify-end gap-2">
-                <Button
-                  className="bg-green-400 md:hidden"
-                  variant={"ghost"}
-                  disabled={file ? true : false}
-                >
-              <label htmlFor="file-input-mobile">
-                  Select File
-              </label>
-                </Button>
+              <Button
+                className="bg-green-400 md:hidden"
+                variant={"ghost"}
+                disabled={file ? true : false}
+              >
+                <label htmlFor="file-input-mobile">Select File</label>
+              </Button>
               <input
                 type="file"
                 className="hidden"
