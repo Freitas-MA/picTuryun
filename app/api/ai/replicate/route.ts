@@ -40,8 +40,9 @@ export async function POST(req: NextRequestWithImage, res: NextResponse) {
       }),
     }
   );
-
+  
   let jsonStartProcessResponse = await startRestoreProcess.json();
+  console.log('Start Restore Process', jsonStartProcessResponse)
 
   let endpointUrl = jsonStartProcessResponse.urls.get;
 

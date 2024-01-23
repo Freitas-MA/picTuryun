@@ -32,3 +32,5 @@ To deploy the application, run `npm run build` to build the static files, then p
 **License:**
 
 This project is licensed under the MIT License.
+
+End of the free replicate API
